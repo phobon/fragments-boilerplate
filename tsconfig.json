@@ -31,7 +31,9 @@
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true,
     "noImplicitAny": false,
-    "strictNullChecks": true
+    "strictNullChecks": true,
+
+    "types": ["vite/client"]
   },
   "include": ["src", "src/design", "**/*.ts", "**/*.tsx"],
   "exclude": ["node_modules"]

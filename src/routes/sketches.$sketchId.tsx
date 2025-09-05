@@ -7,21 +7,26 @@ export const Route = createFileRoute('/sketches/$sketchId')({
   component: RouteComponent,
 })
 
+if (import.meta.hot) {
+  import.meta.hot.accept(() => {
+    window.location.reload()
+  })
+}
+
 function RouteComponent() {
   const { sketchId } = Route.useParams()
 
   const [module, setModule] = useState<any>({})
 
+  const sketches: Record<string, { default: () => any }> = import.meta.glob('../sketches/*.ts', { eager: true })
+
   useEffect(() => {
-    import(`../sketches/${sketchId}.ts`)
-      .then((module) => {
-        setModule({
-          colorNode: module.default,
-        })
-      })
-      .catch((error) => {
-        console.error('Failed to load shader:', error)
-      })
+    const mod = sketches[`../sketches/${sketchId}.ts`]
+    if (mod) {
+      setModule({ colorNode: mod.default })
+    } else {
+      console.error('Sketch not found:', sketchId)
+    }
   }, [sketchId])
 
   const ref = useRef<any>(null)
