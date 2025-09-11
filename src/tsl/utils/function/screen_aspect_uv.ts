@@ -1,4 +1,4 @@
-import { float, Fn, uv, vec2, select } from 'three/tsl'
+import { float, Fn, sin, uv, vec2, select } from 'three/tsl'
 
 /**
  * Returns uv coordinates with adjusted aspect ratio.

@@ -1,4 +1,4 @@
-import { Fn, float, vec3, Loop, mul, add, div } from 'three/tsl'
+import { Fn, float, vec3, Loop, mul, add, div, vec2 } from 'three/tsl'
 import { simplexNoise3d } from './simplex_noise_3d'
 
 /**
@@ -103,5 +103,51 @@ export const domainWarpedFbm = Fn(
 
     // Sample FBM at warped position
     return fbm(warpedP, octaves, frequency, amplitude, lacunarity, gain)
+  },
+)
+
+/**
+ * Warped FBM coordinates that uses FBM to warp the input coordinates.
+ * @param {vec2} uv0 - Input 2D position.
+ * @param {float} _time - Time.
+ * @param {float} frequency - Frequency.
+ * @param {float} offset1 - Offset 1.
+ * @param {float} offset2 - Offset 2.
+ * @param {float} oscillation1 - Oscillation 1.
+ * @param {float} oscillation2 - Oscillation 2.
+ * @param {float} contribution1 - Contribution 1.
+ * @param {float} contribution2 - Contribution 2.
+ * @returns {float} Warped FBM noise value.
+ * @example
+ */
+export const warpedFbmCoords = Fn(
+  ([
+    uv0,
+    _time,
+    frequency = 25,
+    offset1 = 25,
+    offset2 = 75,
+    oscillation1 = 10,
+    oscillation2 = 3,
+    contribution1 = 0.2,
+    contribution2 = 0.1,
+  ]) => {
+    const _uv = uv0.toVar()
+
+    // // First layer of warping
+    const warp1X = fbm(vec3(_uv.mul(oscillation1), _time))
+    const warp1Y = fbm(vec3(_uv.mul(oscillation1).add(offset1), _time))
+    const warp1 = vec2(warp1X, warp1Y).sub(0.5).mul(contribution1)
+    const warpedUV1 = _uv.add(warp1)
+
+    // Second layer of warping on the already warped coordinates
+    const warp2X = fbm(vec3(warpedUV1.mul(oscillation2), _time.mul(0.5)))
+    const warp2Y = fbm(vec3(warpedUV1.mul(oscillation2).add(offset2), _time.mul(0.5)))
+    const warp2 = vec2(warp2X, warp2Y).sub(0.5).mul(contribution2)
+    const finalUV = warpedUV1.add(warp2)
+
+    // Sample final pattern with warped coordinates
+    const n = simplexNoise3d(vec3(finalUV.mul(frequency), _time))
+    return n
   },
 )

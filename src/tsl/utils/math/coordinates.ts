@@ -1,4 +1,30 @@
-import { vec4, float, vec2, length, If, Fn, mix, clamp, smoothstep, mul, sqrt, abs, atan, cos, sin } from 'three/tsl'
+import {
+  dot,
+  vec4,
+  uniformArray,
+  float,
+  uniform,
+  vec2,
+  int,
+  length,
+  exp,
+  Loop,
+  If,
+  Fn,
+  mix,
+  vec3,
+  clamp,
+  smoothstep,
+  mul,
+  sqrt,
+  abs,
+  atan,
+  cos,
+  sin,
+  debug,
+  PI,
+  uv,
+} from 'three/tsl'
 
 /**
  * Computes a bilinear gradient between four colors using barycentric coordinates
