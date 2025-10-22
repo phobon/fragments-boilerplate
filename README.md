@@ -120,21 +120,32 @@ src/
 │   ├── debug/
 │   │   ├── debug.tsx
 │   │   └── index.ts
-│   └── layout/
-│       └── main/
-│           ├── index.ts
-│           └── main.tsx
+│   ├── layout/
+│   │   └── main/
+│   │       ├── index.ts
+│   │       └── main.tsx
+│   └── sketches_dropdown/
+│       ├── index.css
+│       ├── index.ts
+│       ├── sketches_dropdown.tsx
+│       └── sketches_list.tsx
 ├── routes/
 │   ├── __root.tsx
 │   ├── index.tsx
 │   └── sketches.$.tsx
 ├── sketches/
-│   ├── dawn-1.ts
 │   ├── flare-1.ts
 │   └── nested/
 │       └── dawn-1.ts
 ├── stores/
 ├── tsl/
+│   ├── effects/
+│   │   ├── canvas_weave_effect.ts
+│   │   ├── grain_texture_effect.ts
+│   │   ├── led_effect.ts
+│   │   ├── pixellation_effect.ts
+│   │   ├── speckled_noise_effect.ts
+│   │   └── vignette_effect.ts
 │   ├── noise/
 │   │   ├── common.ts
 │   │   ├── curl_noise_3d.ts
@@ -145,9 +156,15 @@ src/
 │   │   ├── simplex_noise_4d.ts
 │   │   └── turbulence.ts
 │   ├── post_processing/
+│   │   ├── chromatic_aberration_effect.ts
+│   │   ├── crt_scanline_effect.ts
+│   │   ├── dither_effect.ts
 │   │   ├── grain_texture_effect.ts
-│   │   ├── lcd_effect.ts
-│   │   └── post_processing.tsx
+│   │   ├── halftone_effect.ts
+│   │   ├── led_effect.ts
+│   │   ├── pixellation_effect.ts
+│   │   ├── post_processing.tsx
+│   │   └── vignette_effect.ts
 │   └── utils/
 │       ├── color/
 │       │   ├── cosine_palette.ts
@@ -163,10 +180,9 @@ src/
 │       ├── math/
 │       │   ├── complex.ts
 │       │   └── coordinates.ts
-│       ├── sdf/
-│       │   ├── operations.ts
-│       │   └── shapes.ts
-│       └── texture.ts
+│       └── sdf/
+│           ├── operations.ts
+│           └── shapes.ts
 ├── utils/
 │   ├── cn.ts
 │   ├── error_boundary.tsx

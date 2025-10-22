@@ -1,4 +1,4 @@
-import { float, max, Fn, dot, vec3, normalize, reflect, mix, and } from 'three/tsl'
+import { float, max, Fn, dot, vec3, normalize, reflect, mix } from 'three/tsl'
 
 /**
  * Returns a fresnel effect based on a given view direction and normal.

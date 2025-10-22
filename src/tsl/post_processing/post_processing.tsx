@@ -1,9 +1,9 @@
 import { useFrame, useThree } from '@react-three/fiber'
 import { useEffect, useRef } from 'react'
-import { mrt, pass, emissive, output, screenSize } from 'three/tsl'
+import { mrt, pass, emissive, output } from 'three/tsl'
 import * as THREE from 'three/webgpu'
 
-export const PostProcessing = ({ effect }) => {
+export const PostProcessing = ({ effect, args = {} }) => {
   const { gl: renderer, scene, camera } = useThree()
   const postProcessingRef = useRef<any>(null)
 
@@ -22,8 +22,8 @@ export const PostProcessing = ({ effect }) => {
     // Setup post-processing
     const postProcessing = new THREE.PostProcessing(renderer as any)
 
-    const outputNode = effect()
-    postProcessing.outputNode = outputPass.mul(outputNode)
+    const outputNode = effect({ input: outputPass, ...args })
+    postProcessing.outputNode = outputNode
 
     postProcessingRef.current = postProcessing
 

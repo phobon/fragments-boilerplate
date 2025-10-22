@@ -11,38 +11,37 @@
     "serve": "vite preview"
   },
   "dependencies": {
-    "@react-three/drei": "10.7.4",
-    "@react-three/fiber": "9.3.0",
-    "@tanstack/react-router": "^1.131.34",
+    "@react-three/drei": "10.7.6",
+    "@react-three/fiber": "9.4.0",
+    "@tanstack/react-router": "^1.133.22",
     "leva": "^0.10.0",
     "maath": "^0.10.8",
-    "react": "^19.1.1",
-    "react-dom": "^19.1.1",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
     "three": "^0.180.0",
     "zustand": "5.0.8"
   },
   "devDependencies": {
-    "@tanstack/router-devtools": "^1.131.34",
-    "@tanstack/router-vite-plugin": "^1.131.34",
-    "@types/node": "^24.3.0",
-    "@types/react": "^19.1.12",
-    "@types/react-dom": "^19.1.9",
-    "@types/uuid": "^10.0.0",
-    "@vitejs/plugin-react": "^5.0.2",
+    "@tanstack/router-devtools": "^1.133.22",
+    "@tanstack/router-vite-plugin": "^1.133.22",
+    "@types/node": "^24.9.1",
+    "@types/react": "^19.2.2",
+    "@types/react-dom": "^19.2.2",
+    "@types/uuid": "^11.0.0",
+    "@vitejs/plugin-react": "^5.0.4",
     "babel-plugin-react-compiler": "19.1.0-rc.3",
-    "eslint": "^9.34.0",
+    "eslint": "^9.38.0",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-prettier": "^5.5.4",
     "eslint-plugin-react": "^7.37.5",
     "eslint-plugin-react-compiler": "19.1.0-rc.2",
     "prettier": "^3.6.2",
     "rimraf": "^6.0.1",
-    "typescript": "^5.9.2",
-    "vite": "^6",
-    "vite-plugin-glsl": "^1.5.1"
+    "typescript": "^5.9.3",
+    "vite": "^7.1.11",
+    "vite-plugin-glsl": "^1.5.4"
   },
   "volta": {
     "node": "22.17.0"
-  },
-  "packageManager": "pnpm@10.11.0+sha256.a69e9cb077da419d47d18f1dd52e207245b29cac6e076acedbeb8be3b1a67bd7"
+  }
 }
