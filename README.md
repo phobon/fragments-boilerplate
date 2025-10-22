@@ -113,40 +113,40 @@ const onFrame = (material: MeshBasicNodeMaterial, state: RootState) => {
 ```
 src/
 ├── components/
-│   ├── canvas/
-│   │   ├── color_space_correction.tsx
-│   │   ├── webgpu_scene.tsx
-│   │   └── webgpu_sketch.tsx
-│   ├── debug/
+│   ├── canvas/                          # WebGPU canvas components
+│   │   ├── color_space_correction.tsx   # Color space correction utilities
+│   │   ├── webgpu_scene.tsx             # Main WebGPU scene wrapper
+│   │   └── webgpu_sketch.tsx            # Sketch renderer component
+│   ├── debug/                           # Debug utilities
 │   │   ├── debug.tsx
 │   │   └── index.ts
-│   ├── layout/
+│   ├── layout/                          # Layout components
 │   │   └── main/
 │   │       ├── index.ts
 │   │       └── main.tsx
-│   └── sketches_dropdown/
+│   └── sketches_dropdown/               # UI for sketch selection
 │       ├── index.css
 │       ├── index.ts
 │       ├── sketches_dropdown.tsx
 │       └── sketches_list.tsx
-├── routes/
-│   ├── __root.tsx
-│   ├── index.tsx
-│   └── sketches.$.tsx
-├── sketches/
-│   ├── flare-1.ts
-│   └── nested/
-│       └── dawn-1.ts
-├── stores/
-├── tsl/
-│   ├── effects/
+├── routes/                              # TanStack Router routes
+│   ├── __root.tsx                       # Root layout
+│   ├── index.tsx                        # Home page
+│   └── sketches.$.tsx                   # Dynamic sketch route
+├── sketches/                            # Your creative sketches go here
+│   ├── flare-1.ts                       # Example sketch
+│   └── nested/                          # Organize in subdirectories
+│       └── dawn-1.ts                    # Example nested sketch
+├── stores/                              # Zustand state stores
+├── tsl/                                 # Three.js Shading Language utilities
+│   ├── effects/                         # Visual effects
 │   │   ├── canvas_weave_effect.ts
 │   │   ├── grain_texture_effect.ts
 │   │   ├── led_effect.ts
 │   │   ├── pixellation_effect.ts
 │   │   ├── speckled_noise_effect.ts
 │   │   └── vignette_effect.ts
-│   ├── noise/
+│   ├── noise/                           # Noise functions
 │   │   ├── common.ts
 │   │   ├── curl_noise_3d.ts
 │   │   ├── curl_noise_4d.ts
@@ -155,7 +155,7 @@ src/
 │   │   ├── simplex_noise_3d.ts
 │   │   ├── simplex_noise_4d.ts
 │   │   └── turbulence.ts
-│   ├── post_processing/
+│   ├── post_processing/                 # Post-processing effects
 │   │   ├── chromatic_aberration_effect.ts
 │   │   ├── crt_scanline_effect.ts
 │   │   ├── dither_effect.ts
@@ -165,32 +165,40 @@ src/
 │   │   ├── pixellation_effect.ts
 │   │   ├── post_processing.tsx
 │   │   └── vignette_effect.ts
-│   └── utils/
-│       ├── color/
+│   └── utils/                           # TSL utility functions
+│       ├── color/                       # Color utilities
 │       │   ├── cosine_palette.ts
 │       │   └── tonemapping.ts
-│       ├── function/
+│       ├── function/                    # General TSL functions
 │       │   ├── bloom.ts
 │       │   ├── bloom_edge_pattern.ts
 │       │   ├── domain_index.ts
 │       │   ├── median3.ts
 │       │   ├── repeating_pattern.ts
 │       │   └── screen_aspect_uv.ts
-│       ├── lighting.ts
-│       ├── math/
+│       ├── lighting.ts                  # Lighting utilities
+│       ├── math/                        # Math utilities
+│       │   ├── __tests__/
 │       │   ├── complex.ts
 │       │   └── coordinates.ts
-│       └── sdf/
+│       └── sdf/                         # Signed distance functions
 │           ├── operations.ts
 │           └── shapes.ts
-├── utils/
-│   ├── cn.ts
-│   ├── error_boundary.tsx
-│   ├── math.ts
-│   ├── use_isomorphic_layout_effect.ts
-│   └── wait.ts
-├── index.css
-├── index.d.ts
-├── main.tsx
-└── routeTree.gen.ts
+├── utils/                               # General utilities
+│   ├── cn.ts                            # Class name utilities
+│   ├── error_boundary.tsx               # Error boundary component
+│   ├── math.ts                          # Math helpers
+│   ├── use_isomorphic_layout_effect.ts  # React hook
+│   └── wait.ts                          # Async utilities
+├── index.css                            # Global styles
+├── index.d.ts                           # Type declarations
+├── main.tsx                             # App entry point
+└── routeTree.gen.ts                     # Generated route tree
 ```
+
+### Key Directories
+
+- **`src/sketches/`** - Add your creative coding sketches here. Each `.ts` file becomes a route automatically.
+- **`src/tsl/`** - Reusable Three.js Shading Language utilities (noise, effects, post-processing, etc.)
+- **`src/components/canvas/`** - Core WebGPU rendering components
+- **`src/routes/`** - TanStack Router route definitions

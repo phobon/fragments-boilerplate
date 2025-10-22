@@ -14,7 +14,7 @@
 import { Fn, screenSize, vec3, fract, pow, time } from 'three/tsl'
 import { cosinePalette } from '@/tsl/utils/color/cosine_palette'
 import { screenAspectUV } from '@/tsl/utils/function/screen_aspect_uv'
-import { grainTextureEffect } from '@/tsl/post_processing/grain_texture_effect'
+import { grainTextureEffect } from '@/tsl/effects/grain_texture_effect'
 
 /**
  * A gradient sketch tribute to Rik Oostenbroek.
