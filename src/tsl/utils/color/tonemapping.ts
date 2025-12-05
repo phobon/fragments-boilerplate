@@ -1,4 +1,4 @@
-import { Fn, vec3, pow, float, mix, smoothstep, exp, div } from 'three/tsl'
+import { Fn, vec3, pow, float, mix, smoothstep, exp, div, clamp, add, mul } from 'three/tsl'
 
 /**
  * Applies Reinhard tonemapping to a color vector.
@@ -15,18 +15,21 @@ export const reinhardTonemap = Fn(([_color]) => {
  * @returns {vec3} Tonemapped color
  */
 export const uncharted2Tonemap = Fn(([_color]) => {
-  // Constants from Uncharted2 tonemapping
-  const A = float(0.15)
-  const B = float(0.5)
-  const C = float(0.1)
-  const D = float(0.2)
-  const E = float(0.02)
-  const F = float(0.3)
-  return _color
-    .mul(A)
-    .add(_color.mul(_color).mul(B))
-    .div(_color.mul(_color).mul(C).add(_color.mul(D)).add(E))
-    .sub(F.div(E))
+  const col = _color
+  col.mulAssign(16.0)
+
+  const a = float(0.15)
+  const b = float(0.5)
+  const c = float(0.1)
+  const d = float(0.2)
+  const e = float(0.02)
+  const f = float(0.3)
+
+  return col
+    .mul(a.mul(col).add(c.mul(b)))
+    .add(d.mul(e))
+    .div(col.mul(a.mul(col).add(b)).add(d.mul(f)))
+    .sub(e.div(f))
 })
 
 /**
@@ -35,16 +38,13 @@ export const uncharted2Tonemap = Fn(([_color]) => {
  * @returns {vec3} Tonemapped color
  */
 export const acesTonemap = Fn(([_color]) => {
-  const a = 2.51
-  const b = 0.03
-  const c = 2.43
-  const d = 0.59
-  const e = 0.14
-  return _color
-    .mul(a)
-    .add(b)
-    .div(_color.mul(c).add(_color.mul(d)).add(e))
-    .clamp(0.0, 1.0)
+  const a = float(2.51)
+  const b = float(0.03)
+  const c = float(2.43)
+  const d = float(0.59)
+  const e = float(0.14)
+
+  return _color.mul(a.mul(_color).add(b)).div(_color.mul(c.mul(_color).add(d)).add(e))
 })
 
 /**
@@ -99,6 +99,22 @@ export const cinematicTonemap = Fn(([_color]) => {
   const g = smoothstep(0.05, 0.95, _color.y.mul(1.05))
   const b = smoothstep(0.05, 0.95, _color.z.mul(1.1))
   return vec3(r, g, b).clamp(0.0, 1.0)
+})
+/**
+ *  Unreal 3, Documentation: "Color Grading"
+ * Adapted to be close to Tonemap_ACES, with similar range
+ * Gamma 2.2 correction is baked in, don't use with sRGB conversion!
+ */
+export const unrealTonemap = Fn(([_color]) => {
+  return _color.div(_color.add(0.155)).mul(1.019)
+})
+
+export const tanhTonemap = Fn(([_color]) => {
+  const x = _color
+  x.assign(clamp(x, -40.0, 40.0))
+  const e = exp(mul(-2.0, x))
+
+  return add(-1.0, div(2.0, add(1.0, e)))
 })
 
 /**

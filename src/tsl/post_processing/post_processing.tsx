@@ -1,9 +1,15 @@
 import { useFrame, useThree } from '@react-three/fiber'
 import { useEffect, useRef } from 'react'
-import { mrt, pass, emissive, output } from 'three/tsl'
+import { mrt, pass, emissive, output, Fn } from 'three/tsl'
 import * as THREE from 'three/webgpu'
 
-export const PostProcessing = ({ effect, args = {} }) => {
+export type PostProcessingProps = {
+  effect: Fn
+  wrap?: 'none' | 'repeat' | 'mirror'
+  args?: Record<string, any>
+}
+
+export const PostProcessing = ({ effect, wrap = 'none', args = {} }: PostProcessingProps) => {
   const { gl: renderer, scene, camera } = useThree()
   const postProcessingRef = useRef<any>(null)
 
@@ -18,6 +24,20 @@ export const PostProcessing = ({ effect, args = {} }) => {
 
     // Get texture nodes
     const outputPass = scenePass.getTextureNode('output')
+
+    // Handle texture wrapping
+    switch (wrap) {
+      case 'none':
+        break
+      case 'repeat':
+        outputPass.value.wrapS = THREE.RepeatWrapping
+        outputPass.value.wrapT = THREE.RepeatWrapping
+        break
+      case 'mirror':
+        outputPass.value.wrapS = THREE.MirroredRepeatWrapping
+        outputPass.value.wrapT = THREE.MirroredRepeatWrapping
+        break
+    }
 
     // Setup post-processing
     const postProcessing = new THREE.PostProcessing(renderer as any)

@@ -7,7 +7,7 @@ import { float, max, Fn, dot, vec3, normalize, reflect, mix } from 'three/tsl'
  * @param {number} [p=2] - The fresnel exponent.
  * @returns {float} The fresnel effect value.
  */
-export const fresnel = Fn(([viewDir, normal, p = 2]) => {
+export const fresnel = Fn(([viewDir, normal, p = float(2)]) => {
   const fresnel = float(1)
     .sub(max(0, dot(viewDir, normal)))
     .pow(p)
@@ -51,7 +51,7 @@ export const diffuse = Fn(([lightDir, normal, lightColor]) => {
  * @param {number} [p=32] - The phong exponent.
  * @returns {vec3} The specular light color.
  */
-export const phongSpecular = Fn(([viewDir, normal, lightDir, p = 32]) => {
+export const phongSpecular = Fn(([viewDir, normal, lightDir, p = float(32)]) => {
   const ph = normalize(reflect(lightDir.negate(), normal))
   const phongValue = max(0, dot(viewDir, ph)).pow(p)
   const specular = vec3(phongValue).toVar()

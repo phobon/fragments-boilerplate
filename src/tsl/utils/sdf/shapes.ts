@@ -18,6 +18,12 @@ import {
   add,
 } from 'three/tsl'
 
+type SdParallelogramOptions = {
+  wi?: ReturnType<typeof float>
+  he?: ReturnType<typeof float>
+  sk?: ReturnType<typeof float>
+}
+
 /**
  * Returns a sphere SDF based on a given uv and radius.
  * @param {Array} _uv - The UV coordinates (vec2).
@@ -45,7 +51,7 @@ export const sdBox2d = Fn(([_uv, _size = float(0.0)]) => {
  * @param {vec3} [_size=0.0] - The half-size (extent) of the box along each axis.
  * @returns {number} The signed distance from the box surface.
  */
-export const sdBox3d = Fn(([p, b]) => {
+export const sdBox3d = Fn(([p, b = vec3(0)]) => {
   const q = abs(p).sub(b)
   return length(max(q, 0.0)).add(min(max(q.x, max(q.y, q.z)), 0.0))
 })
@@ -66,7 +72,7 @@ export const sdDiamond = Fn(([_uv, r = 0.0]) => {
  * @param {number} [_r=0.5] - The radius of the hexagon.
  * @returns {number} The signed distance from the hexagon surface.
  */
-export const sdHexagon = Fn(([p = vec2(0), _r = 0.5]) => {
+export const sdHexagon = Fn(([p, _r = 0.5]) => {
   const r = float(_r)
   const k = vec3(-0.866025404, 0.5, 0.577350269)
 
@@ -83,11 +89,11 @@ export const sdHexagon = Fn(([p = vec2(0), _r = 0.5]) => {
  * @param {number} [_r=0.1] - The radius of the triangle (float).
  * @returns {number} The signed distance from the triangle surface.
  */
-export const sdEquilateralTriangle = Fn(([p = vec2(0), _r = float(0.1)]) => {
+export const sdEquilateralTriangle = Fn(([p, _r = float(0.1)]) => {
   const r = float(_r)
 
   const k = sqrt(3.0)
-  const _p = p.toVar()
+  const _p = (p ?? vec2(0)).toVar()
 
   _p.x = abs(_p.x).sub(r).toVar()
   _p.y = _p.y.add(r.div(k)).toVar()
@@ -115,19 +121,21 @@ export const sdLine = Fn(([p]) => {
  * @param {number} [s=0.4] - The radius of the ring.
  * @returns {number} The signed distance from the ring surface.
  */
-export const sdRing = Fn(([_uv, s = 0.4]) => {
+export const sdRing = Fn(([_uv, s = float(0.4)]) => {
   return abs(length(_uv).sub(s)).toVar()
 })
 
 /**
  * Returns a parallelogram SDF based on a given uv and size.
  * @param {Array} _uv - The UV coordinates (vec2).
- * @param {number} [wi=0.4] - The width of the parallelogram.
- * @param {number} [he=0.1] - The height of the parallelogram.
- * @param {number} [sk=0.1] - The skew of the parallelogram.
+ * @param {Object} [options] - Optional configuration values.
+ * @param {number} [options.wi=0.4] - The width of the parallelogram.
+ * @param {number} [options.he=0.1] - The height of the parallelogram.
+ * @param {number} [options.sk=0.1] - The skew of the parallelogram.
  * @returns {number} The signed distance from the parallelogram surface.
  */
-export const sdParallelogram = Fn(([_p, wi, he, sk]) => {
+export const sdParallelogram = Fn(([_p, options = {}]) => {
+  const { wi = float(0.4), he = float(0.1), sk = float(0.1) } = options as SdParallelogramOptions
   const p = _p.toVar()
   const e = vec2(sk, he)
 
@@ -159,7 +167,7 @@ const ndot = Fn(([a, b]) => {
  * @param {number} [b=0.4] - The size of the rhombus.
  * @returns {number} The signed distance from the rhombus surface.
  */
-export const sdRhombus = Fn(([_p, b]) => {
+export const sdRhombus = Fn(([_p, b = vec2(0.4)]) => {
   const p = _p.toVar()
   p.assign(abs(p))
   const h = clamp(ndot(b.sub(mul(2.0, p)), b).div(dot(b, b)), -1.0, 1.0)
@@ -174,7 +182,7 @@ export const sdRhombus = Fn(([_p, b]) => {
  * @param {number} [size=0.4] - The size of the triangle.
  * @returns {number} The signed distance from the triangle surface.
  */
-export const sdTriangle = Fn(([_p, size]) => {
+export const sdTriangle = Fn(([_p, size = float(0.4)]) => {
   const t = max(abs(_p.x.mul(size)).add(_p.y), abs(_p.y.mul(size).sub(0.5)).sub(0.5))
   return t
 })
