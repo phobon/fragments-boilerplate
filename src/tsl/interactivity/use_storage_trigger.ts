@@ -182,4 +182,3 @@ export const useStorageTrigger = (buffer: ShaderBuffer, dataBuffers?: Record<str
 
   return trigger
 }
-

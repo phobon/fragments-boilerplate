@@ -14,9 +14,7 @@ export const canvasWeavePattern = Fn(([_uv]) => {
 
   // Create irregular weave pattern
   const weaveX = sin(warpedGrid.x.mul(PI).add(fbm(vec3(_uv.mul(100.0), 0.0), { octaves: 2 }).mul(0.5)))
-  const weaveY = sin(
-    warpedGrid.y.mul(PI).add(fbm(vec3(_uv.mul(100.0).add(0.5), 0.0), { octaves: 2 }).mul(0.5)),
-  )
+  const weaveY = sin(warpedGrid.y.mul(PI).add(fbm(vec3(_uv.mul(100.0).add(0.5), 0.0), { octaves: 2 }).mul(0.5)))
 
   // Soften the intersections
   const weave = weaveX.mul(weaveY)

@@ -45,4 +45,3 @@ export const useStorageBuffers = <T extends string>(keys: T[], size: number = 10
     return buffers
   }, [keys, size])
 }
-

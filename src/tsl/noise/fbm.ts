@@ -36,8 +36,7 @@ type WarpedFbmCoordsOptions = {
  * @returns {float} FBM noise value.
  */
 export const fbm = Fn(([p, options = {}]) => {
-  const { octaves = 4.0, frequency = 1.0, amplitude = 1.0, lacunarity = 2.0, gain = 0.5 } =
-    options as FbmOptions
+  const { octaves = 4.0, frequency = 1.0, amplitude = 1.0, lacunarity = 2.0, gain = 0.5 } = options as FbmOptions
   const value = float(0.0).toVar()
   const currentAmplitude = float(amplitude).toVar()
   const currentFrequency = float(frequency).toVar()
@@ -75,8 +74,7 @@ export const fbm = Fn(([p, options = {}]) => {
  * @returns {float} Ridged FBM noise value.
  */
 export const ridgedFbm = Fn(([p, options = {}]) => {
-  const { octaves = 4.0, frequency = 1.0, amplitude = 1.0, lacunarity = 2.0, gain = 0.5 } =
-    options as FbmOptions
+  const { octaves = 4.0, frequency = 1.0, amplitude = 1.0, lacunarity = 2.0, gain = 0.5 } = options as FbmOptions
   const value = float(0.0).toVar()
   const currentAmplitude = float(amplitude).toVar()
   const currentFrequency = float(frequency).toVar()

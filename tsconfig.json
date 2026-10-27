@@ -1,40 +1,40 @@
 {
-  "compilerOptions": {
-    "baseUrl": ".",
-    "paths": {
-      "@/*": ["./src/*"],
-      "@/routes/*": ["./src/routes/*"],
-      "@/components/*": ["./src/components/*"],
-      "@/utils/*": ["./src/utils/*"],
-      "@/sketches/*": ["./src/sketches/*"],
-      "@/tsl/*": ["./src/tsl/*"],
-      // https://stackoverflow.com/questions/73019348/component-cannot-be-used-as-a-jsx-component-its-element-type-reactelementan
-      "react": ["./node_modules/@types/react"]
-    },
-    "target": "ES2022",
-    "useDefineForClassFields": true,
-    "lib": ["ES2020", "DOM", "DOM.Iterable"],
-    "module": "ESNext",
-    "skipLibCheck": true,
+	"compilerOptions": {
+		"paths": {
+			"*": ["./*"],
+			"@/*": ["./src/*"],
+			"@/routes/*": ["./src/routes/*"],
+			"@/components/*": ["./src/components/*"],
+			"@/utils/*": ["./src/utils/*"],
+			"@/sketches/*": ["./src/sketches/*"],
+			"@/tsl/*": ["./src/tsl/*"],
+			// https://stackoverflow.com/questions/73019348/component-cannot-be-used-as-a-jsx-component-its-element-type-reactelementan
+			"react": ["./node_modules/@types/react"]
+		},
+		"target": "ES2022",
+		"useDefineForClassFields": true,
+		"lib": ["ES2020", "DOM", "DOM.Iterable"],
+		"module": "ESNext",
+		"skipLibCheck": true,
 
-    /* Bundler mode */
-    "moduleResolution": "bundler",
-    "allowImportingTsExtensions": true,
-    "resolveJsonModule": true,
-    "isolatedModules": true,
-    "noEmit": true,
-    "jsx": "react-jsx",
+		/* Bundler mode */
+		"moduleResolution": "bundler",
+		"allowImportingTsExtensions": true,
+		"resolveJsonModule": true,
+		"isolatedModules": true,
+		"noEmit": true,
+		"jsx": "react-jsx",
 
-    /* Linting */
-    "strict": true,
-    "noUnusedLocals": true,
-    "noUnusedParameters": true,
-    "noFallthroughCasesInSwitch": true,
-    "noImplicitAny": false,
-    "strictNullChecks": true,
+		/* Linting */
+		"strict": true,
+		"noUnusedLocals": true,
+		"noUnusedParameters": true,
+		"noFallthroughCasesInSwitch": true,
+		"noImplicitAny": false,
+		"strictNullChecks": true,
 
-    "types": ["vite/client"]
-  },
-  "include": ["src", "src/design", "**/*.ts", "**/*.tsx"],
-  "exclude": ["node_modules"]
+		"types": ["vite/client"]
+	},
+	"include": ["src", "src/design", "**/*.ts", "**/*.tsx"],
+	"exclude": ["node_modules"]
 }

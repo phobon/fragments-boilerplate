@@ -1,4 +1,4 @@
-import { Fn, vec3, float, screenSize, vec4, uv, dot, If, int, floor } from 'three/tsl'
+import { dot, Fn, float, floor, If, int, screenSize, uv, vec3, vec4 } from 'three/tsl'
 
 const bayerMatrix8x8Values = [
   0.0 / 64.0,

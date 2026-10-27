@@ -72,6 +72,4 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   SketchesSplatRoute: SketchesSplatRoute,
 }
-export const routeTree = rootRouteImport
-  ._addFileChildren(rootRouteChildren)
-  ._addFileTypes<FileRouteTypes>()
+export const routeTree = rootRouteImport._addFileChildren(rootRouteChildren)._addFileTypes<FileRouteTypes>()
