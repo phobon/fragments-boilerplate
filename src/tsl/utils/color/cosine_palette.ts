@@ -1,4 +1,4 @@
-import { Fn, float, cos } from 'three/tsl'
+import { cos, Fn, float } from 'three/tsl'
 
 /**
  * Generates a palette of colors using a cosine-based function

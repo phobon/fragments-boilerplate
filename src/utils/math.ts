@@ -1,4 +1,4 @@
-export const clamp = (min: number, input: number, max: number) => {
+export const clamp = (input: number, min: number, max: number) => {
   return Math.max(min, Math.min(input, max))
 }
 
@@ -14,11 +14,11 @@ export const truncate = (value: number, decimals: number) => {
   return parseFloat(value.toFixed(decimals))
 }
 
-export const randomFromRange = (min: number, max: number) => {
+export const randomFromRange = (min, max) => {
   return Math.random() * (max - min) + min
 }
 
-export const randomFromArray = (array: any[]) => {
+export const randomFromArray = (array) => {
   return array[Math.floor(Math.random() * array.length)]
 }
 

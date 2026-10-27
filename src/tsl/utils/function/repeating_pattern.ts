@@ -1,4 +1,4 @@
-import { float, Fn, sin } from 'three/tsl'
+import { Fn, float, sin } from 'three/tsl'
 
 /**
  * Returns a repeating pattern of a sine function.

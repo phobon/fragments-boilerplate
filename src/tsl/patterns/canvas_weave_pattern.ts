@@ -1,5 +1,5 @@
-import { fbm } from '@/tsl/noise/fbm'
-import { Fn, fract, sin, PI, vec3, smoothstep, mix } from 'three/tsl'
+import { Fn, fract, mix, PI, sin, smoothstep, vec3 } from 'three/tsl'
+import { fbm } from '../noise/fbm'
 
 /**
  * Returns a canvas weave pattern value for a given UV coordinate.

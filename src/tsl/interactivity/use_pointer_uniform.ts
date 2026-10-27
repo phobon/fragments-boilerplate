@@ -1,11 +1,9 @@
-'use client'
-
-import { clamp } from '@/utils/math'
 import { useFrame } from '@react-three/fiber'
 import { useMemo } from 'react'
 import { uniform } from 'three/tsl'
 import type { UniformNode } from 'three/webgpu'
 import * as THREE from 'three/webgpu'
+import { clamp } from '../../utils/math'
 
 /**
  * Mirrors the current pointer position into a TSL uniform, expressed in [-1, 1] NDC space.

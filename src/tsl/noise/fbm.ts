@@ -1,4 +1,4 @@
-import { Fn, float, vec3, Loop, mul, add, div, vec2 } from 'three/tsl'
+import { add, div, Fn, float, Loop, mul, vec2, vec3 } from 'three/tsl'
 import { simplexNoise3d } from './simplex_noise_3d'
 
 type FbmOptions = {
@@ -42,7 +42,6 @@ export const fbm = Fn(([p, options = {}]) => {
   const currentFrequency = float(frequency).toVar()
   const maxValue = float(0.0).toVar()
 
-  // @ts-ignore
   Loop({ start: 0.0, end: octaves, type: 'float' }, ({ i }) => {
     // Sample noise at current frequency
     const noiseValue = simplexNoise3d(mul(p, currentFrequency))
@@ -80,7 +79,6 @@ export const ridgedFbm = Fn(([p, options = {}]) => {
   const currentFrequency = float(frequency).toVar()
   const maxValue = float(0.0).toVar()
 
-  // @ts-ignore
   Loop({ start: 0.0, end: octaves, type: 'float' }, ({ i }) => {
     // Sample noise and create ridges by taking absolute value and inverting
     const noiseValue = simplexNoise3d(mul(p, currentFrequency))
@@ -128,8 +126,20 @@ export const domainWarpedFbm = Fn(([p, options = {}]) => {
   // Create warping offset using FBM
   const warpOffset = vec3(
     fbm(p, { octaves, frequency, amplitude, lacunarity, gain }),
-    fbm(add(p, vec3(100.0)), { octaves, frequency, amplitude, lacunarity, gain }),
-    fbm(add(p, vec3(200.0)), { octaves, frequency, amplitude, lacunarity, gain }),
+    fbm(add(p, vec3(100.0)), {
+      octaves,
+      frequency,
+      amplitude,
+      lacunarity,
+      gain,
+    }),
+    fbm(add(p, vec3(200.0)), {
+      octaves,
+      frequency,
+      amplitude,
+      lacunarity,
+      gain,
+    }),
   )
 
   // Apply warping to input position

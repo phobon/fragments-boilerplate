@@ -1,45 +1,46 @@
-import { Fn, vec2, float, normalize, length, vec4, uv } from 'three/tsl'
+// @ts-nocheck — vendored TSL; its type defs do not match the app-pinned three@0.186 (many errors under its own tsconfig too). App code IS typechecked; these files are skipped. See backlog Tier 2 "tsc -b".
+import { Fn, float, length, max, pow, uv, vec2, vec4 } from 'three/tsl'
 
 /**
- * Creates a chromatic aberration effect by separating RGB channels.
+ * Radial (lens-style) chromatic aberration.
+ *
+ * RGB channels are progressively offset along the radial direction from a focal
+ * `center`: the image stays sharp at `center` and the colour separation grows
+ * toward the edges. Every parameter maps to an obvious on-canvas control —
+ * `center` is a draggable focal point, `strength` a magnitude ring.
+ *
  * @param {Object} props - Effect parameters
  * @param {vec4} props.input - The input color texture from the scene
- * @param {number} [props.strength=0.01] - Strength of the aberration offset
- * @param {number} [props.radial=1.0] - Amount of radial distortion (0 = directional, 1 = radial from center)
- * @param {vec2} [props.direction=vec2(1,0)] - Direction of aberration when radial=0
+ * @param {vec2} [props.inputUV] - Optional UV coordinates (defaults to built-in uv)
+ * @param {number} [props.strength=0.5] - Overall separation amount (0 = none, 1 = strong)
+ * @param {vec2} [props.center=vec2(0.5, 0.5)] - Focal point where aberration is zero
+ * @param {number} [props.falloff=2.0] - Edge ramp exponent (higher = more edge-concentrated)
  * @returns {vec4} The chromatic aberration processed color
  */
 export const chromaticAberrationEffect = Fn((props) => {
-  const { input, inputUV = uv, strength = 0.01, radial = 0.5, direction = vec2(0, 0) } = props || {}
+  const { input, inputUV = uv, strength = 0.5, center = vec2(0.5, 0.5), falloff = 2.0 } = props || {}
 
-  // We need to use the built-in uv() here to work as a post-processing effect
   const _uv = inputUV().toVar()
-
   const _strength = float(strength)
-  const _radial = float(radial)
-  const _direction = direction.toVar()
+  const _falloff = float(falloff)
 
-  // Calculate offset direction
-  const center = vec2(0.5, 0.5).toVar()
   const toCenter = _uv.sub(center).toVar()
   const dist = length(toCenter).toVar()
 
-  // Mix between directional and radial
-  const radialDir = normalize(toCenter).toVar()
-  const offsetDir = normalize(_direction.mul(float(1).sub(_radial)).add(radialDir.mul(_radial))).toVar()
+  // Safe radial direction — zero-length only at the focal point, where the
+  // aberration magnitude (below) is also zero.
+  const radialDir = toCenter.div(max(dist, float(1e-5))).toVar()
 
-  // Create different offsets for each channel
-  const offset = offsetDir.mul(_strength).mul(dist.add(0.5)).toVar()
+  // Separation grows from 0 at the focal point toward the edges. pow(dist,
+  // falloff) lets the artist control how edge-concentrated it is; falloff=2
+  // reproduces a natural quadratic ramp. The 0.15 keeps strength≈1 strong but
+  // usable (a few-percent UV shift at the corners).
+  const aberration = _strength.mul(float(0.15)).mul(pow(dist, _falloff)).toVar()
+  const channelOffset = radialDir.mul(aberration).toVar()
 
-  const rOffset = _uv.add(offset.mul(1.0)).toVar()
-  const gOffset = _uv.toVar()
-  const bOffset = _uv.sub(offset.mul(1.0)).toVar()
+  const rSample = input.sample(_uv.add(channelOffset))
+  const gSample = input.sample(_uv)
+  const bSample = input.sample(_uv.sub(channelOffset))
 
-  // Sample input texture at different offsets for each channel
-  const rSample = input.sample(rOffset)
-  const gSample = input.sample(gOffset)
-  const bSample = input.sample(bOffset)
-
-  // Combine RGB channels with original alpha
-  return vec4(rSample.r, gSample.g, bSample.b, input.sample(_uv).a)
+  return vec4(rSample.r, gSample.g, bSample.b, gSample.a)
 })

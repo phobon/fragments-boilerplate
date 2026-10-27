@@ -1,5 +1,5 @@
 // Three.js Transpiler r164
-import { vec4, mod, Fn, mul, sub, vec3, vec2, dot, floor, step, min, max, float, abs } from 'three/tsl'
+import { abs, dot, Fn, float, floor, max, min, mod, mul, step, sub, vec2, vec3, vec4 } from 'three/tsl'
 import { permute, taylorInvSqrt } from './common'
 
 /**

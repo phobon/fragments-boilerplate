@@ -1,4 +1,5 @@
-import { vec2, Fn, fract, sin, dot, uv } from 'three/tsl'
+// @ts-nocheck — vendored TSL; its type defs do not match the app-pinned three@0.186 (many errors under its own tsconfig too). App code IS typechecked; these files are skipped. See backlog Tier 2 "tsc -b".
+import { dot, Fn, fract, sin, uv, vec2, vec4 } from 'three/tsl'
 
 /**
  * Creates a grain texture effect for post-processing.

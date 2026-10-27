@@ -1,9 +1,9 @@
 'use client'
 
-import { clamp } from '@/utils/math'
 import { useFrame, useThree } from '@react-three/fiber'
 import { useEffect, useRef, useState } from 'react'
 import * as THREE from 'three/webgpu'
+import { clamp } from '../../utils/math'
 
 /**
  * Options controlling the procedural trail texture.
@@ -207,9 +207,9 @@ export const useGridTrailTexture = (options?: UseGridTrailTextureProps): THREE.D
           const speedGrid = Math.hypot(vxGrid, vyGrid)
 
           // Shape the response with gamma, then scale with gain*strength
-          const vxCurved = Math.sign(vxGrid) * Math.pow(Math.abs(vxGrid), influenceGamma)
-          const vyCurved = Math.sign(vyGrid) * Math.pow(Math.abs(vyGrid), influenceGamma)
-          const speedCurved = Math.pow(speedGrid, influenceGamma)
+          const vxCurved = Math.sign(vxGrid) * Math.abs(vxGrid) ** influenceGamma
+          const vyCurved = Math.sign(vyGrid) * Math.abs(vyGrid) ** influenceGamma
+          const speedCurved = speedGrid ** influenceGamma
 
           // Encode displacement direction scaled by magnitude (shader applies its own gain)
           const scale = influenceGain * strength * force

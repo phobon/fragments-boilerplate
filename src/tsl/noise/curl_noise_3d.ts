@@ -1,5 +1,5 @@
 // Base on https://al-ro.github.io/projects/embers/
-import { EPSILON, cross, Fn, vec3 } from 'three/tsl'
+import { cross, EPSILON, Fn, vec3 } from 'three/tsl'
 import { simplexNoise3d } from './simplex_noise_3d'
 
 /**
@@ -46,7 +46,6 @@ export const curlNoise3d = Fn(([inputA]) => {
   const bGrabNoise = vec3(bXAverage, bYAverage, bZAverage).normalize()
 
   return cross(aGrabNoise, bGrabNoise).normalize()
-  // @ts-ignore
 }).setLayout({
   name: 'curlNoise3d',
   type: 'vec3',

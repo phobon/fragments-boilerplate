@@ -1,5 +1,4 @@
-import { Fn, fract, pow, float, smoothstep, length, screenSize } from 'three/tsl'
-import { screenAspectUV } from '@/tsl/utils/function'
+import { clamp, Fn, float, fract, length, pow, screenSize, smoothstep } from 'three/tsl'
 
 /**
  * Creates an LED screen pattern with configurable parameters.
@@ -10,16 +9,14 @@ import { screenAspectUV } from '@/tsl/utils/function'
  * @param {number} [props.edgeSoftness=0.2] - Controls the smoothness of the LED pattern edges
  * @returns {float} The LED pattern value
  */
-export const ledPattern = Fn((props) => {
+export const ledPattern = Fn(([_uv, options = null]) => {
   const {
     resolution = screenSize,
     cellSize = float(10),
     intensity = float(0.5),
     intensityFalloff = float(1.8),
     edgeSoftness = float(0.2),
-  } = props || {}
-
-  const _uv = screenAspectUV(resolution).toVar()
+  } = options || {}
 
   const _scaledRes = resolution.div(cellSize)
 
@@ -40,6 +37,7 @@ export const ledPattern = Fn((props) => {
 
   pattern.assign(smoothstep(edgeSoftness, 1, pattern))
   pattern.assign(pow(pattern, intensityFalloff))
+  // pattern.assign(clamp(pattern, 0, 1))
 
   return pattern
 })

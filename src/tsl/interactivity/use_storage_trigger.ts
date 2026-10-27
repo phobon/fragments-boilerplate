@@ -1,6 +1,6 @@
 import { useFrame } from '@react-three/fiber'
-import { useRef, useCallback } from 'react'
 import { animate } from 'motion'
+import { useCallback, useRef } from 'react'
 import type { ShaderBuffer } from './use_storage_buffers'
 
 export type EasingType = 'linear' | 'easeIn' | 'easeOut' | 'easeInOut' | 'spring'

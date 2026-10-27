@@ -1,5 +1,6 @@
-import { Fn, vec2, float, uv } from 'three/tsl'
-import { swirlDistortion } from '@/tsl/distortion/swirl_distortion'
+// @ts-nocheck — vendored TSL; its type defs do not match the app-pinned three@0.186 (many errors under its own tsconfig too). App code IS typechecked; these files are skipped. See backlog Tier 2 "tsc -b".
+import { Fn, float, uv, vec2 } from 'three/tsl'
+import { swirlDistortion } from '../distortion/swirl_distortion'
 
 /**
  * Creates a swirl/twirl distortion effect for post-processing.
@@ -23,3 +24,14 @@ export const swirlDistortionEffect = Fn((props) => {
 
   return input.sample(distortedUV)
 })
+
+/**
+ * WP2 (docs/shader-perf-implementation-plan.md): re-export of the UV
+ * transform above, under the stable name `ppRemapUVRegistry` expects.
+ * Calling convention: `swirlDistortionUV(uvNode, args)`, matching this
+ * module's existing `swirlDistortion(_uv, options)` helper convention (see
+ * mirror_distortion_effect.ts for the rationale, applied uniformly across
+ * all nine remap effects). No behaviour change: this is the exact same
+ * `swirlDistortion` `swirlDistortionEffect` calls above.
+ */
+export { swirlDistortion as swirlDistortionUV }

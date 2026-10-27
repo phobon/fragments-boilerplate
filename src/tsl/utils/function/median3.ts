@@ -1,4 +1,4 @@
-import { float, Fn, If } from 'three/tsl'
+import { Fn, float, If } from 'three/tsl'
 
 export const median3 = Fn(([a, b, c]) => {
   const _a = float(a)

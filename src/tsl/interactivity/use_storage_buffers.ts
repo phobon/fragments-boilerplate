@@ -1,7 +1,7 @@
-import { storage } from 'three/tsl'
 import { useMemo } from 'react'
-import * as THREE from 'three/webgpu'
+import { storage } from 'three/tsl'
 import type { StorageBufferNode } from 'three/webgpu'
+import * as THREE from 'three/webgpu'
 
 export type ShaderBuffer = {
   active: StorageBufferNode

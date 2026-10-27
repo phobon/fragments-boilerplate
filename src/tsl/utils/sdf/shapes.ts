@@ -1,21 +1,22 @@
+// @ts-nocheck — vendored TSL; its type defs do not match the app-pinned three@0.186 (many errors under its own tsconfig too). App code IS typechecked; these files are skipped. See backlog Tier 2 "tsc -b".
 import {
-  Fn,
-  length,
-  min,
-  max,
   abs,
-  vec2,
-  sqrt,
-  sign,
-  float,
-  dot,
-  vec3,
-  If,
-  clamp,
-  select,
-  mul,
-  sub,
   add,
+  clamp,
+  dot,
+  Fn,
+  float,
+  If,
+  length,
+  max,
+  min,
+  mul,
+  select,
+  sign,
+  sqrt,
+  sub,
+  vec2,
+  vec3,
 } from 'three/tsl'
 
 type SdParallelogramOptions = {
@@ -33,6 +34,26 @@ type SdParallelogramOptions = {
 export const sdSphere = Fn(([_uv, r = float(0.0)]) => {
   const _r = float(r)
   return length(_uv).sub(_r)
+})
+
+/**
+ * Returns an ellipse SDF based on a given point and per-axis radii, using
+ * iq's gradient-normalized approximation (`k0 * (k0 - 1) / k1`, with
+ * `k0 = length(p / r)` and `k1 = length(p / (r * r))`). It's exact on a
+ * circle (`r.x === r.y`) and approximate on an eccentric ellipse, but stays
+ * distance-accurate near the boundary — the region a fixed-width feather
+ * (`smoothstep`) actually samples — which is the whole point: a uniform
+ * visible feather width regardless of aspect ratio, unlike a naive
+ * unit-circle pre-scale. `k1` is guarded with `max(k1, 1e-6)` since it hits
+ * exactly zero at `p = (0, 0)`, which would otherwise divide by zero.
+ * @param {vec2} p - The point coordinates (vec2).
+ * @param {vec2} [r=vec2(0.5)] - The per-axis radii of the ellipse.
+ * @returns {number} The approximate signed distance from the ellipse surface.
+ */
+export const sdEllipse = Fn(([p, r = vec2(0.5)]) => {
+  const k0 = length(p.div(r))
+  const k1 = length(p.div(r.mul(r)))
+  return k0.mul(k0.sub(1)).div(max(k1, 1e-6))
 })
 
 /**
@@ -54,6 +75,20 @@ export const sdBox2d = Fn(([_uv, _size = float(0.0)]) => {
 export const sdBox3d = Fn(([p, b = vec3(0)]) => {
   const q = abs(p).sub(b)
   return length(max(q, 0.0)).add(min(max(q.x, max(q.y, q.z)), 0.0))
+})
+
+/**
+ * Returns a 2d rounded-box SDF based on a given point, half-extents and corner radius.
+ * @param {vec2} p - The point coordinates (vec2).
+ * @param {vec2} [b=vec2(0.5)] - The half-size (extent) of the box along each axis.
+ * @param {number} [r=0.1] - The corner radius (r=0 gives a sharp box).
+ * @returns {number} The signed distance from the rounded-box surface.
+ */
+export const sdRoundedBox = Fn(([p, b = vec2(0.5), r = float(0.1)]) => {
+  const q = abs(p).sub(b).add(r)
+  return min(max(q.x, q.y), 0.0)
+    .add(length(max(q, 0.0)))
+    .sub(r)
 })
 
 /**
@@ -121,7 +156,7 @@ export const sdLine = Fn(([p]) => {
  * @param {number} [s=0.4] - The radius of the ring.
  * @returns {number} The signed distance from the ring surface.
  */
-export const sdRing = Fn(([_uv, s = float(0.4)]) => {
+export const sdRing = Fn(([_uv, s = float(0.25)]) => {
   return abs(length(_uv).sub(s)).toVar()
 })
 
@@ -186,3 +221,40 @@ export const sdTriangle = Fn(([_p, size = float(0.4)]) => {
   const t = max(abs(_p.x.mul(size)).add(_p.y), abs(_p.y.mul(size).sub(0.5)).sub(0.5))
   return t
 })
+
+/**
+ * Signed distance to an arbitrary simple polygon (iq's sdPolygon) whose
+ * vertex count is FIXED at trace time.
+ *
+ * Deliberately NOT an `Fn` like every other fragment in this file: `Fn` has
+ * no variable arity, and the one generator that emits calls to this (the
+ * shape-mask pen tool, app ADR 0043) always knows N when it generates code.
+ * So this is a plain JS factory: `verts` is a JS ARRAY of vec2 nodes
+ * (length >= 3, absolute p-space) and the loop below unrolls into the
+ * caller's node graph at trace time — no runtime array machinery. The call
+ * site reads identically to the `Fn` siblings:
+ * `sdPolygon(p, [vec2(...), vec2(...), vec2(...)])`.
+ *
+ * Returns TRUE signed distance (negative inside), so the mask feather stays
+ * uniform along polygon edges, matching sdRoundedBox/sdEllipse.
+ */
+export const sdPolygon = (p, verts) => {
+  const _p = vec2(p).toVar()
+  const d = dot(_p.sub(verts[0]), _p.sub(verts[0])).toVar()
+  const s = float(1.0).toVar()
+  for (let i = 0, j = verts.length - 1; i < verts.length; j = i, i++) {
+    const vi = vec2(verts[i]).toVar()
+    const vj = vec2(verts[j]).toVar()
+    const e = vj.sub(vi).toVar()
+    const w = _p.sub(vi).toVar()
+    const b = w.sub(e.mul(clamp(dot(w, e).div(dot(e, e)), 0.0, 1.0))).toVar()
+    d.assign(min(d, dot(b, b)))
+    const c1 = _p.y.greaterThanEqual(vi.y)
+    const c2 = _p.y.lessThan(vj.y)
+    const c3 = e.x.mul(w.y).greaterThan(e.y.mul(w.x))
+    const allOf = c1.and(c2).and(c3)
+    const noneOf = c1.not().and(c2.not()).and(c3.not())
+    s.mulAssign(select(allOf.or(noneOf), -1.0, 1.0))
+  }
+  return s.mul(sqrt(d))
+}

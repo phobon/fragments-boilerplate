@@ -1,4 +1,5 @@
-import { Fn, vec2, float, length, atan2, sin, cos, oneMinus } from 'three/tsl'
+// @ts-nocheck — vendored TSL; its type defs do not match the app-pinned three@0.186 (many errors under its own tsconfig too). App code IS typechecked; these files are skipped. See backlog Tier 2 "tsc -b".
+import { atan, cos, Fn, float, length, oneMinus, sin, vec2 } from 'three/tsl'
 
 type SwirlDistortionOptions = {
   strength?: ReturnType<typeof float>
@@ -17,19 +18,22 @@ type SwirlDistortionOptions = {
  */
 export const swirlDistortion = Fn(([_uv, options = {}]) => {
   const { strength = float(1), radius = float(0.5), center = vec2(0) } = options as SwirlDistortionOptions
+  const _strength = float(strength)
+  const _radius = float(radius)
   const uv = _uv.toVar()
-  const offset = uv.sub(center).toVar()
+  const _center = vec2(center).sub(0.5).toVar()
+  const offset = uv.sub(_center).toVar()
   const dist = length(offset).toVar()
 
   // Calculate angle and apply rotation based on distance from center
-  const angle = atan2(offset.y, offset.x).toVar()
-  const rotation = angle.add(strength.mul(oneMinus(dist.div(radius)))).toVar()
+  const angle = atan(offset.y, offset.x).toVar()
+  const rotation = angle.add(_strength.mul(oneMinus(dist.div(_radius)))).toVar()
 
   // Use the rotation to create new offset position
   const rotatedOffset = vec2(dist.mul(cos(rotation)), dist.mul(sin(rotation))).toVar()
 
   // Return the new UV position
-  const distortedUV = center.add(rotatedOffset)
+  const distortedUV = _center.add(rotatedOffset)
 
   return distortedUV
 })

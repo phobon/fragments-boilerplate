@@ -1,5 +1,6 @@
-import { Fn, smoothstep, pow, uv } from 'three/tsl'
-import { sdSphere } from '@/tsl/utils/sdf/shapes'
+// @ts-nocheck — vendored TSL; its type defs do not match the app-pinned three@0.186 (many errors under its own tsconfig too). App code IS typechecked; these files are skipped. See backlog Tier 2 "tsc -b".
+import { Fn, pow, smoothstep, uv } from 'three/tsl'
+import { sdSphere } from '../utils/sdf/shapes'
 
 /**
  * Creates a vignette effect for post-processing.

@@ -1,6 +1,6 @@
-import { abs, float, Fn } from 'three/tsl'
-import { repeatingPattern } from './repeating_pattern'
+import { abs, Fn, float } from 'three/tsl'
 import { bloom } from './bloom'
+import { repeatingPattern } from './repeating_pattern'
 
 /**
  * Returns a repeating pattern of lines with a bloom effect.

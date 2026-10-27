@@ -1,4 +1,7 @@
-import { dot, Fn, float, floor, If, int, screenSize, uv, vec3, vec4 } from 'three/tsl'
+// @ts-nocheck — vendored TSL; its type defs do not match the app-pinned three@0.186 (many errors under its own tsconfig too). App code IS typechecked; these files are skipped. See backlog Tier 2 "tsc -b".
+import { defined, dot, Fn, float, floor, int, screenSize, uniformArray, uv, vec3, vec4 } from 'three/tsl'
+
+const REC709_LUMA = vec3(0.2126, 0.7152, 0.0722)
 
 const bayerMatrix8x8Values = [
   0.0 / 64.0,
@@ -67,36 +70,68 @@ const bayerMatrix8x8Values = [
   21.0 / 64.0,
 ]
 
+const bayerMatrix = uniformArray(bayerMatrix8x8Values)
+
 const getBayerValue8x8 = Fn(([x, y]) => {
-  const index = y.mul(8).add(x).toVar()
-  const value = float(0.0).toVar()
-
-  // Unroll the array lookup using conditionals
-  for (let i = 0; i < 64; i++) {
-    If(index.equal(i), () => {
-      value.assign(bayerMatrix8x8Values[i])
-    })
-  }
-
-  return value
+  const index = y.mul(8).add(x)
+  return bayerMatrix.element(index)
 })
 
 const dither = Fn(([_uv, resolution, color, colorThreshold, bias]) => {
-  const colorNum = float(colorThreshold)
+  const levels = float(colorThreshold).sub(1.0)
   const _color = color.toVar()
 
   const x = int(_uv.x.mul(resolution.x)).mod(8)
   const y = int(_uv.y.mul(resolution.y)).mod(8)
-  const threshold = getBayerValue8x8(x, y).sub(bias).toVar()
+  const threshold = getBayerValue8x8(x, y).sub(bias)
 
   _color.rgb.addAssign(threshold)
 
-  _color.r.assign(floor(_color.r.mul(colorNum.sub(1.0)).add(0.5)).div(colorNum.sub(1.0)))
-  _color.g.assign(floor(_color.g.mul(colorNum.sub(1.0)).add(0.5)).div(colorNum.sub(1.0)))
-  _color.b.assign(floor(_color.b.mul(colorNum.sub(1.0)).add(0.5)).div(colorNum.sub(1.0)))
+  _color.r.assign(floor(_color.r.mul(levels).add(0.5)).div(levels))
+  _color.g.assign(floor(_color.g.mul(levels).add(0.5)).div(levels))
+  _color.b.assign(floor(_color.b.mul(levels).add(0.5)).div(levels))
 
   return _color
 })
+
+const readConstValue = (value: unknown): unknown => {
+  if (value != null && typeof value === 'object' && 'isNode' in value && (value as { isNode: boolean }).isNode) {
+    let resolved: unknown = value
+    ;(
+      value as {
+        traverse: (cb: (node: { isConstNode?: boolean; value?: unknown }) => void) => void
+      }
+    ).traverse((node) => {
+      if (node.isConstNode) {
+        resolved = node.value
+      }
+    })
+    return resolved
+  }
+
+  return value
+}
+
+const parseTintVec3 = (tint: unknown) => {
+  const plain = readConstValue(tint)
+
+  if (typeof plain === 'string') {
+    const hex = plain.replace('#', '')
+    if (hex.length === 6) {
+      return vec3(
+        parseInt(hex.slice(0, 2), 16) / 255,
+        parseInt(hex.slice(2, 4), 16) / 255,
+        parseInt(hex.slice(4, 6), 16) / 255,
+      )
+    }
+  }
+
+  if (Array.isArray(plain) && plain.length >= 3) {
+    return vec3(plain[0], plain[1], plain[2])
+  }
+
+  return vec3(1, 1, 1)
+}
 
 /**
  * Creates a dithering effect for post-processing using an 8x8 Bayer matrix.
@@ -106,21 +141,29 @@ const dither = Fn(([_uv, resolution, color, colorThreshold, bias]) => {
  * @param {number} [props.pixelSize=2] - Size of dithering pixels in screen pixels
  * @param {number} [props.colorThreshold=0.25] - Threshold for color quantization (0-1)
  * @param {number} [props.bias=0.15] - Bias added to dithering pattern (0-1)
- * @param {vec3} [props.color=null] - Optional color to tint the dithered result
+ * @param {boolean} [props.useTint=false] - When true, dither luminance then multiply by tint
+ * @param {string} [props.tint='#ffffff'] - Hex tint color (used when useTint is true)
  * @returns {vec4} The dithered color output
  */
 export const ditherEffect = Fn((props) => {
-  const { input, inputUV = uv, pixelSize = 2, colorThreshold = 0.35, bias = 0.25, color = null } = props || {}
+  const {
+    input,
+    inputUV = uv,
+    pixelSize = 2,
+    colorThreshold = 0.35,
+    bias = 0.25,
+    useTint = false,
+    tint = '#ffffff',
+  } = props || {}
 
   const _uv = inputUV().toVar()
-
-  // Scale resolution by pixelSize so Bayer matrix tiles at the block level
   const scaledResolution = screenSize.div(float(pixelSize))
+  const useTintEnabled = defined(useTint)
+  const tintColor = useTintEnabled ? parseTintVec3(tint) : null
 
-  const sourceColor = color ? vec3(dot(vec3(0.2126, 0.7152, 0.0722), input.rgb)) : input.rgb
+  const sourceColor = tintColor ? vec3(dot(REC709_LUMA, input.rgb)) : input.rgb
   const finalColor = dither(_uv, scaledResolution, sourceColor, colorThreshold, bias)
-
-  const colorizedResult = color ? finalColor.mul(color) : finalColor
+  const colorizedResult = tintColor ? finalColor.mul(tintColor) : finalColor
 
   return vec4(colorizedResult, input.a)
 })
