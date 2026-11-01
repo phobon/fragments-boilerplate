@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
-import { Link } from '@tanstack/react-router'
+import { Link, useLocation } from '@tanstack/react-router'
+import { captureSnapshot, recordVideo } from '@/utils/capture_snapshot'
 import './index.css'
 
 type SketchInfo = {
@@ -11,6 +12,9 @@ export function SketchesDropdown() {
   const dropdownRef = useRef<HTMLDivElement>(null)
   const [showSketches, setShowSketches] = useState(false)
   const [sketches, setSketches] = useState<SketchInfo[]>([])
+  const [recordingRemaining, setRecordingRemaining] = useState<number | null>(null)
+  const pathname = useLocation({ select: (location) => location.pathname })
+  const snapshotName = pathname.replace(/^\/sketches\//, '').replace(/\//g, '-') || 'snapshot'
 
   useEffect(() => {
     // Use the same glob pattern as the sketches route
@@ -59,6 +63,22 @@ export function SketchesDropdown() {
       <div className='sketches-toggle' ref={dropdownRef}>
         <button onClick={() => setShowSketches(!showSketches)} className='sketches-toggle__button'>
           Sketches
+        </button>
+        <button onClick={() => captureSnapshot(snapshotName)} className='sketches-toggle__button'>
+          Capture snapshot
+        </button>
+        <button
+          onClick={async () => {
+            try {
+              await recordVideo(snapshotName, { onProgress: setRecordingRemaining })
+            } finally {
+              setRecordingRemaining(null)
+            }
+          }}
+          disabled={recordingRemaining !== null}
+          className='sketches-toggle__button'
+        >
+          {recordingRemaining !== null ? `Recording… ${Math.ceil(recordingRemaining / 1000)}s` : 'Record video'}
         </button>
 
         {showSketches && (

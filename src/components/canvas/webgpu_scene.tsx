@@ -3,6 +3,7 @@ import { Canvas } from '@react-three/fiber'
 import { useInView } from 'motion/react'
 import { useRef } from 'react'
 import { WebGPURenderer } from 'three/webgpu'
+import { CaptureTarget } from './capture_target'
 import { ColorSpaceCorrection } from './color_space_correction'
 
 type SceneProps = {
@@ -57,6 +58,8 @@ const WebGPUScene = ({ id = '__webgpucanvas', debug = false, frameloop = 'always
       {children}
 
       <ColorSpaceCorrection />
+
+      <CaptureTarget />
 
       {debug ? <StatsGl className='fragments-boilerplate__statsgl' /> : null}
 
