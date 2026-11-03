@@ -46,7 +46,7 @@ function downloadBlob(blob: Blob, name: string, extension: string) {
 export async function captureSnapshot(name = 'snapshot', width = SNAPSHOT_WIDTH, height = SNAPSHOT_HEIGHT) {
   if (!target || isRecording) {
     if (!target) console.warn('captureSnapshot: no renderer registered')
-    return
+    return false
   }
 
   const { renderer, scene, camera } = target
@@ -75,7 +75,9 @@ export async function captureSnapshot(name = 'snapshot', width = SNAPSHOT_WIDTH,
   }
 
   const blob = await new Promise<Blob | null>((resolve) => output.toBlob(resolve, 'image/png'))
-  if (blob) downloadBlob(blob, name, 'png')
+  if (!blob) return false
+  downloadBlob(blob, name, 'png')
+  return true
 }
 
 const VIDEO_MIME_TYPES = [

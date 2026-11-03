@@ -1,6 +1,6 @@
 import WebGPUScene from '@/components/canvas/webgpu_scene'
 import { WebGPUSketch } from '@/components/canvas/webgpu_sketch'
-import { SketchesDropdown } from '@/components/sketches_dropdown'
+import { Toolbar } from '@/components/toolbar'
 import { createFileRoute } from '@tanstack/react-router'
 import { Suspense, useRef } from 'react'
 import flare1 from '@/sketches/flare-1'
@@ -28,7 +28,7 @@ function Index() {
         </WebGPUScene>
       </Suspense>
 
-      <SketchesDropdown />
+      <Toolbar />
     </section>
   )
 }

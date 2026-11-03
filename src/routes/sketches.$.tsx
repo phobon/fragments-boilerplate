@@ -2,7 +2,7 @@ import { createFileRoute } from '@tanstack/react-router'
 import { Suspense, useEffect, useRef, useState } from 'react'
 import WebGPUScene from '@/components/canvas/webgpu_scene'
 import { WebGPUSketch } from '@/components/canvas/webgpu_sketch'
-import { SketchesDropdown } from '@/components/sketches_dropdown'
+import { Toolbar } from '@/components/toolbar'
 
 export const Route = createFileRoute('/sketches/$')({
   component: RouteComponent,
@@ -56,7 +56,7 @@ function RouteComponent() {
         ) : null}
       </Suspense>
 
-      <SketchesDropdown />
+      <Toolbar />
     </section>
   )
 }
