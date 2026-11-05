@@ -17,7 +17,7 @@ export type PixelSortProps = {
   sortFn?: any
   validateFn?: any
   threshold?: number
-  sortDirection?: 'horizontal' | 'vertical' | 'diagonal'
+  sortDirection?: 'horizontal' | 'vertical'
   // Sorting algorithm.
   //  - "odd-even": simple transposition sort, pairs with the validator gate,
   //    but needs up to `width` passes to converge.
@@ -79,17 +79,7 @@ export const PixelSort = ({
     const writePong = storageTexture(pongTexture).setAccess(NodeAccess.WRITE_ONLY)
 
     // Determine the sort direction (for the odd-even kernel)
-    let _sortDirection = 0
-    switch (sortDirection) {
-      case 'vertical':
-        _sortDirection = 1
-        break
-      case 'diagonal':
-        _sortDirection = 2
-        break
-      default:
-        _sortDirection = 0
-    }
+    const _sortDirection = sortDirection === 'vertical' ? 1 : 0
     const resolution = _width * _height
 
     // Initialize the ping texture with the color node. The colorNode receives a
@@ -216,60 +206,46 @@ export const PixelSort = ({
           let width = ${_width};
           let height = ${_height};
 
-          var indexUV: vec2i;
-          var neighborUV: vec2i;
+          // One thread per pixel
+          let col = i32(index) % width;
+          let row = i32(index) / width;
+          let indexUV = vec2i(col, row);
 
-          // Perform a horizontal sort - we need to make sure we handle the edge cases where the neighbor is out of bounds properly
-          if (${_sortDirection} == 0) {
-            let row = i32(index) / width;
-            let col = i32(index) % width;
-
-            // Neighbor is out of bounds, so we need to write the pixel back to the output texture
-            if (col + 1 >= width) {
-              let pixel = textureLoad(readTex, vec2i(col, row)).rgb;
-              textureStore(writeTex, vec2i(col, row), vec4f(pixel, 1));
-              return;
-            }
-
-            // Only process even columns on even passes, odd columns on odd passes. This is essential for proper odd-even transposition convergence
-            if ((col + i32(offset)) % 2 != 0) {
-              let pixel = textureLoad(readTex, vec2i(col, row)).rgb;
-              let neighbor = textureLoad(readTex, vec2i(col + 1, row)).rgb;
-
-              textureStore(writeTex, vec2i(col, row), vec4f(pixel, 1));
-              textureStore(writeTex, vec2i(col + 1, row), vec4f(neighbor, 1));
-              return;
-            }
-
-            // Set the index UVs for the pixel and neighbor
-            indexUV = vec2i(col, row);
-            neighborUV = vec2i(col + 1, row);
-
-            // Perform a vertical sort - we need to make sure we handle the edge cases where the neighbor is out of bounds properly
-          } else if (${_sortDirection} == 1) {
-            let col = i32(index) % width;
-            let pair = i32(index) / width;
-            let baseRow = pair * 2 + i32(offset);
-
-            // Neighbor is out of bounds, so we need to write the pixel back to the output texture
-            if (baseRow + 1 >= height || baseRow - 1 < 0) {
-              // This is the last row, which has no neighbor, so we need to store the pixel on every frame
-              let indexUV = vec2i(col, baseRow);
-              let pixel = textureLoad(readTex, indexUV).rgb;
-              textureStore(writeTex, indexUV, vec4f(pixel, 1));
-              return;
-            }
-
-            // Set the index UVs for the pixel and neighbor
-            indexUV = vec2i(col, baseRow);
-            neighborUV = vec2i(col, baseRow + 1);
+          // Position along the sort axis, the length of that axis, and the step to the next pixel along it
+          var pos = col;
+          var len = width;
+          var dir = vec2i(1, 0);
+          if (${_sortDirection} == 1) {
+            pos = row;
+            len = height;
+            dir = vec2i(0, 1);
           }
+
+          // Odd-even transposition: each pass pairs every pixel with its next neighbour,
+          // alternating which parity leads the pair. The leading pixel's thread handles the pair
+          let leadsPair = (pos + i32(offset)) % 2 == 0;
+
+          if (!leadsPair) {
+            // The partner thread writes this pixel - except the very first pixel on odd passes, which has no partner
+            if (pos == 0) {
+              textureStore(writeTex, indexUV, vec4f(textureLoad(readTex, indexUV).rgb, 1));
+            }
+            return;
+          }
+
+          // The last pixel has no neighbour, so write it straight through
+          if (pos + 1 >= len) {
+            textureStore(writeTex, indexUV, vec4f(textureLoad(readTex, indexUV).rgb, 1));
+            return;
+          }
+
+          let neighborUV = indexUV + dir;
 
           // Load the pixel and neighbor
           let pixel = textureLoad(readTex, indexUV).rgb;
           let neighbor = textureLoad(readTex, neighborUV).rgb;
 
-          // Validate whether the pixel is valid to sort, if not return early
+          // Validate whether the pixel is valid to sort, if not write both back unchanged
           let valid = validate(pixel, neighbor, indexUV, neighborUV, vec2i(width, height), ${threshold});
           if (!valid) {
             textureStore(writeTex, indexUV, vec4f(pixel, 1));
@@ -342,11 +318,13 @@ export const PixelSort = ({
   const passesDone = useRef(0)
   const bitonicDone = useRef(false)
 
-  useFrame(async ({ gl }) => {
+  useFrame(({ gl }) => {
+    const renderer = gl as any
+
     // For animated inputs, re-seed the ping buffer from the colorNode so this
     // frame sorts the CURRENT source frame, and restart the sort from scratch
     if (reseedEveryFrame) {
-      await (gl as any).computeAsync(computeInit)
+      renderer.compute(computeInit)
       readIsPing.current = true
       passesDone.current = 0
       bitonicDone.current = false
@@ -362,7 +340,7 @@ export const PixelSort = ({
       for (const [k, j] of stages) {
         kU.value = k
         jU.value = j
-        await (gl as any).computeAsync(rp ? computeToPong : computeToPing)
+        renderer.compute(rp ? computeToPong : computeToPing)
         rp = !rp
       }
       m.map = rp ? pingTexture : pongTexture
@@ -380,7 +358,7 @@ export const PixelSort = ({
     // set a small value (e.g. 1-4) to watch the sort crawl in over many frames.
     const perFrame = passesPerFrame ?? defaultPasses
     for (let pass = 0; pass < perFrame; pass++) {
-      await (gl as any).computeAsync(readIsPing.current ? computeToPong : computeToPing)
+      renderer.compute(readIsPing.current ? computeToPong : computeToPing)
       readIsPing.current = !readIsPing.current
     }
     passesDone.current += perFrame

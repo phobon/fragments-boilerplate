@@ -196,15 +196,15 @@ export const sortEdgeStrength = wgslFn(`
   }
 `)
 
-/** Sorts by local contrast ratio (luminance difference over the brighter of the pair), highest contrast first. */
+/** Sorts by contrast - each pixel's luminance distance from mid-grey - with the highest contrast last. */
 export const sortContrast = wgslFn(`
   fn sort(pixel: vec3<f32>, neighbor: vec3<f32>, pixelPos: vec2i, neighborPos: vec2i, gridSize: vec2i) -> bool {
     let pixelLum = dot(pixel, vec3<f32>(0.2126, 0.7152, 0.0722));
     let neighborLum = dot(neighbor, vec3<f32>(0.2126, 0.7152, 0.0722));
 
-    // Calculate contrast ratio
-    let pixelContrast = abs(pixelLum - neighborLum) / max(pixelLum, neighborLum);
-    let neighborContrast = abs(neighborLum - pixelLum) / max(neighborLum, pixelLum);
+    // Contrast as distance from mid-grey - pixels near black or white have the most contrast
+    let pixelContrast = abs(pixelLum - 0.5);
+    let neighborContrast = abs(neighborLum - 0.5);
 
     return pixelContrast > neighborContrast;
   }
