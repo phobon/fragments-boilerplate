@@ -29,12 +29,26 @@ export function registerCaptureTarget(next: CaptureTarget) {
   }
 }
 
-function downloadBlob(blob: Blob, name: string, extension: string) {
+function saveBlobToDisk(blob: Blob, fileName: string) {
+  return fetch(`/__capture?name=${encodeURIComponent(fileName)}`, { method: 'POST', body: blob })
+    .then((res) => res.ok)
+    .catch(() => false)
+}
+
+async function downloadBlob(blob: Blob, name: string, extension: string) {
   const timestamp = new Date().toISOString().replace(/[:.]/g, '-')
+  const fileName = `${name}-${timestamp}.${extension}`
+
+  // In dev, `?capture=disk` writes the file to ./captures via the Vite plugin rather than downloading it
+  const toDisk = import.meta.env.DEV && new URLSearchParams(window.location.search).get('capture') === 'disk'
+  if (toDisk && (await saveBlobToDisk(blob, fileName))) {
+    return
+  }
+
   const url = URL.createObjectURL(blob)
   const a = document.createElement('a')
   a.href = url
-  a.download = `${name}-${timestamp}.${extension}`
+  a.download = fileName
   a.click()
   setTimeout(() => URL.revokeObjectURL(url), 1000)
 }
@@ -76,7 +90,7 @@ export async function captureSnapshot(name = 'snapshot', width = SNAPSHOT_WIDTH,
 
   const blob = await new Promise<Blob | null>((resolve) => output.toBlob(resolve, 'image/png'))
   if (!blob) return false
-  downloadBlob(blob, name, 'png')
+  await downloadBlob(blob, name, 'png')
   return true
 }
 
@@ -171,7 +185,7 @@ export async function recordVideo(
 
     const type = recorder.mimeType || mimeType || 'video/webm'
     const blob = new Blob(chunks, { type })
-    downloadBlob(blob, name, type.includes('mp4') ? 'mp4' : 'webm')
+    await downloadBlob(blob, name, type.includes('mp4') ? 'mp4' : 'webm')
   } finally {
     renderer.setSize = setSize
     renderer.setPixelRatio = setPixelRatio

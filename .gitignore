@@ -40,3 +40,5 @@ dist-ssr
 .pnpm-store/**/*
 
 src/sketches/**/*.ts
+# Dev captures written by the capture-to-disk Vite plugin
+captures/
