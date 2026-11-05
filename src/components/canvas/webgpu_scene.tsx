@@ -61,13 +61,14 @@ const WebGPUScene = ({
 
       <AdaptiveDpr pixelated />
 
+      {/* Default camera - rendered before the sketch so a sketch can provide its own `makeDefault` camera (eg: a PerspectiveCamera) */}
+      <OrthographicCamera makeDefault position={[0, 0, 10]} />
+
       {children}
 
       <ColorSpaceCorrection />
 
       <CaptureTarget />
-
-      <OrthographicCamera makeDefault position={[0, 0, 10]} />
     </Canvas>
   )
 }
