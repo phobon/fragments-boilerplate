@@ -1,12 +1,12 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { Suspense, useEffect, useRef, useState } from 'react'
+import { type ComponentType, Suspense, useEffect, useRef, useState } from 'react'
 import WebGPUScene from '@/components/canvas/webgpu_scene'
 import { WebGPUShader } from '@/components/shader/webgpu_shader'
 import { Toolbar } from '@/components/toolbar'
 import { PostProcessing, type PostProcessingProps } from '@/tsl/post_processing/post_processing'
 
 type SketchModule = {
-  default: () => any
+  default: (() => any) | ComponentType
   postProcessing?: PostProcessingProps
 }
 
@@ -23,18 +23,25 @@ if (import.meta.hot) {
 function RouteComponent() {
   const { _splat: sketchPath } = Route.useParams()
 
-  const [module, setModule] = useState<{ colorNode?: () => any; postProcessing?: PostProcessingProps }>({})
+  const [module, setModule] = useState<{
+    colorNode?: () => any
+    Component?: ComponentType
+    postProcessing?: PostProcessingProps
+  }>({})
 
-  // Updated glob pattern to include subfolders
-  const sketches: Record<string, SketchModule> = import.meta.glob('../sketches/**/*.ts', { eager: true })
+  // `.ts` sketches export a TSL Fn (the colorNode). `.tsx` sketches export a React component that renders inside the
+  // scene, so they can use hooks like useFrame, pointer events and the interactivity utilities.
+  const sketches: Record<string, SketchModule> = import.meta.glob('../sketches/**/*.{ts,tsx}', { eager: true })
 
   useEffect(() => {
     // Convert URL path to file path
-    const filePath = `../sketches/${sketchPath}.ts`
-    const mod = sketches[filePath]
+    const nodeModule = sketches[`../sketches/${sketchPath}.ts`]
+    const componentModule = sketches[`../sketches/${sketchPath}.tsx`]
 
-    if (mod) {
-      setModule({ colorNode: mod.default, postProcessing: mod.postProcessing })
+    if (componentModule) {
+      setModule({ Component: componentModule.default as ComponentType, postProcessing: componentModule.postProcessing })
+    } else if (nodeModule) {
+      setModule({ colorNode: nodeModule.default as () => any, postProcessing: nodeModule.postProcessing })
     } else {
       console.error('Sketch not found:', sketchPath)
     }
@@ -42,22 +49,23 @@ function RouteComponent() {
 
   const ref = useRef<any>(null)
 
-  const { colorNode, postProcessing } = module
+  const { colorNode, Component, postProcessing } = module
 
   return (
     <section className='fragments-boilerplate__main__canvas' ref={ref}>
       <Suspense fallback={null}>
-        {colorNode ? (
+        {colorNode || Component ? (
           <WebGPUScene
             style={{
               position: 'fixed',
               inset: 0,
-              pointerEvents: 'none',
+              // Component sketches can listen to pointer events on the canvas itself (eg: useGridTrailTexture)
+              pointerEvents: Component ? 'auto' : 'none',
             }}
             eventSource={ref}
             eventPrefix='client'
           >
-            <WebGPUShader colorNode={colorNode()} />
+            {Component ? <Component /> : <WebGPUShader colorNode={colorNode()} />}
             {postProcessing ? <PostProcessing {...postProcessing} /> : null}
           </WebGPUScene>
         ) : null}

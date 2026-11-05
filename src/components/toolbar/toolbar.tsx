@@ -19,13 +19,13 @@ type SketchInfo = {
 }
 
 // Same glob as the sketches route
-const sketchesGlob = import.meta.glob('../../sketches/**/*.ts', { eager: true })
+const sketchesGlob = import.meta.glob('../../sketches/**/*.{ts,tsx}', { eager: true })
 
 const SKETCHES: SketchInfo[] = Object.keys(sketchesGlob)
   .sort()
   .map((filePath) => {
-    // ../../sketches/nested/dawn-1.ts -> nested/dawn-1
-    const relativePath = filePath.replace('../../sketches/', '').replace(/\.ts$/, '')
+    // ../../sketches/nested/dawn-1.ts (or .tsx) -> nested/dawn-1
+    const relativePath = filePath.replace('../../sketches/', '').replace(/\.tsx?$/, '')
     return {
       name: relativePath.split('/').pop() || relativePath,
       path: `/${relativePath}`,
@@ -39,7 +39,11 @@ const SKETCHES: SketchInfo[] = Object.keys(sketchesGlob)
 export function Toolbar() {
   const rootRef = useRef<HTMLDivElement>(null)
   const pathname = useLocation({ select: (location) => location.pathname })
-  const captureName = pathname.replace(/^\/sketches\//, '').replace(/^\/$/, '').replace(/\//g, '-') || 'snapshot'
+  const captureName =
+    pathname
+      .replace(/^\/sketches\//, '')
+      .replace(/^\/$/, '')
+      .replace(/\//g, '-') || 'snapshot'
 
   const [menuOpen, setMenuOpen] = useState(false)
   const [saved, setSaved] = useState(false)
@@ -68,7 +72,10 @@ export function Toolbar() {
 
   const isRecording = remaining !== null
   const durationSeconds = Math.round(VIDEO_DURATION_MS / 1000)
-  const progress = useMemo(() => (isRecording ? 1 - remaining / VIDEO_DURATION_MS : undefined), [isRecording, remaining])
+  const progress = useMemo(
+    () => (isRecording ? 1 - remaining / VIDEO_DURATION_MS : undefined),
+    [isRecording, remaining],
+  )
 
   const onSnapshot = async () => {
     setFlashKey((k) => k + 1)
