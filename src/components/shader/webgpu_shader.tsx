@@ -11,7 +11,7 @@ import { MeshBasicNodeMaterial, MeshStandardMaterialProps } from 'three/webgpu'
  * @param {(material: MeshBasicNodeMaterial, state: RootState) => void} [props.onFrame] - Optional frame callback.
  * @returns {JSX.Element}
  */
-const TemplateImpl = ({ colorNode, opacityNode, onFrame, ...props }: WebGPUSketchProps) => {
+const TemplateImpl = ({ colorNode, opacityNode, onFrame, ...props }: WebGPUShaderProps) => {
   const s = new MeshBasicNodeMaterial({ transparent: true })
   const _uv = uv()
 
@@ -44,7 +44,7 @@ const TemplateImpl = ({ colorNode, opacityNode, onFrame, ...props }: WebGPUSketc
  * @property {(material: MeshBasicNodeMaterial, state: RootState) => void} [onFrame] - Frame callback.
  * @property {ReactNode} [children] - Optional children.
  */
-export type WebGPUSketchProps = {
+export type WebGPUShaderProps = {
   colorNode?: any
   opacityNode?: any
   onFrame?: (material: MeshBasicNodeMaterial, state: RootState) => void
@@ -53,16 +53,16 @@ export type WebGPUSketchProps = {
 
 /**
  * WebGPU sketch component. Renders children or a default template mesh.
- * @param {WebGPUSketchProps} props
+ * @param {WebGPUShaderProps} props
  * @returns {JSX.Element}
  */
-export const WebGPUSketch = ({
+export const WebGPUShader = ({
   colorNode = undefined,
   opacityNode = undefined,
   onFrame = undefined,
   children,
   ...props
-}: WebGPUSketchProps) => {
+}: WebGPUShaderProps) => {
   return (
     <>
       {children ? (

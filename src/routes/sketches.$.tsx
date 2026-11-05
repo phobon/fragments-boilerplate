@@ -1,8 +1,14 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { Suspense, useEffect, useRef, useState } from 'react'
 import WebGPUScene from '@/components/canvas/webgpu_scene'
-import { WebGPUSketch } from '@/components/canvas/webgpu_sketch'
+import { WebGPUShader } from '@/components/shader/webgpu_shader'
 import { Toolbar } from '@/components/toolbar'
+import { PostProcessing, type PostProcessingProps } from '@/tsl/post_processing/post_processing'
+
+type SketchModule = {
+  default: () => any
+  postProcessing?: PostProcessingProps
+}
 
 export const Route = createFileRoute('/sketches/$')({
   component: RouteComponent,
@@ -17,10 +23,10 @@ if (import.meta.hot) {
 function RouteComponent() {
   const { _splat: sketchPath } = Route.useParams()
 
-  const [module, setModule] = useState<any>({})
+  const [module, setModule] = useState<{ colorNode?: () => any; postProcessing?: PostProcessingProps }>({})
 
   // Updated glob pattern to include subfolders
-  const sketches: Record<string, { default: () => any }> = import.meta.glob('../sketches/**/*.ts', { eager: true })
+  const sketches: Record<string, SketchModule> = import.meta.glob('../sketches/**/*.ts', { eager: true })
 
   useEffect(() => {
     // Convert URL path to file path
@@ -28,7 +34,7 @@ function RouteComponent() {
     const mod = sketches[filePath]
 
     if (mod) {
-      setModule({ colorNode: mod.default })
+      setModule({ colorNode: mod.default, postProcessing: mod.postProcessing })
     } else {
       console.error('Sketch not found:', sketchPath)
     }
@@ -36,7 +42,7 @@ function RouteComponent() {
 
   const ref = useRef<any>(null)
 
-  const { colorNode } = module
+  const { colorNode, postProcessing } = module
 
   return (
     <section className='fragments-boilerplate__main__canvas' ref={ref}>
@@ -51,7 +57,8 @@ function RouteComponent() {
             eventSource={ref}
             eventPrefix='client'
           >
-            <WebGPUSketch colorNode={colorNode()} />
+            <WebGPUShader colorNode={colorNode()} />
+            {postProcessing ? <PostProcessing {...postProcessing} /> : null}
           </WebGPUScene>
         ) : null}
       </Suspense>

@@ -1,8 +1,8 @@
-import WebGPUScene from '@/components/canvas/webgpu_scene'
-import { WebGPUSketch } from '@/components/canvas/webgpu_sketch'
-import { Toolbar } from '@/components/toolbar'
 import { createFileRoute } from '@tanstack/react-router'
 import { Suspense, useRef } from 'react'
+import WebGPUScene from '@/components/canvas/webgpu_scene'
+import { WebGPUShader } from '@/components/shader/webgpu_shader'
+import { Toolbar } from '@/components/toolbar'
 import flare1 from '@/sketches/flare-1'
 
 export const Route = createFileRoute('/')({
@@ -24,7 +24,7 @@ function Index() {
           eventSource={ref}
           eventPrefix='client'
         >
-          <WebGPUSketch colorNode={flare1()} />
+          <WebGPUShader colorNode={flare1()} />
         </WebGPUScene>
       </Suspense>
 

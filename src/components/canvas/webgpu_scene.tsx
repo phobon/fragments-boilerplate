@@ -29,7 +29,13 @@ type SceneProps = {
  * - Pauses the render loop when the canvas is out of view
  * - Preloads assets and adapts DPR
  */
-const WebGPUScene = ({ id = '__webgpucanvas', debug = false, frameloop = 'always', children, ...props }: SceneProps) => {
+const WebGPUScene = ({
+  id = '__webgpucanvas',
+  debug = false,
+  frameloop = 'always',
+  children,
+  ...props
+}: SceneProps) => {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const isInView = useInView(canvasRef, { margin: '50px' })
   const canvasFrameloop = isInView ? frameloop : 'never'
@@ -60,8 +66,6 @@ const WebGPUScene = ({ id = '__webgpucanvas', debug = false, frameloop = 'always
       <ColorSpaceCorrection />
 
       <CaptureTarget />
-
-      {debug ? <StatsGl className='fragments-boilerplate__statsgl' /> : null}
 
       <OrthographicCamera makeDefault position={[0, 0, 10]} />
     </Canvas>

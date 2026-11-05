@@ -11,10 +11,15 @@
  * - ShareAlike: Distribute derivatives under the same license
  */
 
-import { abs, Fn, oneMinus, screenSize, uv, vec3, floor, sin, PI, mul, Loop, vec2 } from 'three/tsl'
+import { abs, Fn, floor, Loop, mul, oneMinus, PI, screenSize, sin, uv, vec2, vec3 } from 'three/tsl'
+import { grainTexturePattern } from '@/tsl/patterns/grain_texture_pattern'
+import { contrastAdjustment } from '@/tsl/post_processing/contrast_adjustment'
+import { hueRotateAdjustment } from '@/tsl/post_processing/hue_rotate_adjustment'
+import { pixellationEffect } from '@/tsl/post_processing/pixellation_effect'
+import type { PostProcessingProps } from '@/tsl/post_processing/post_processing'
+import { saturationAdjustment } from '@/tsl/post_processing/saturation_adjustment'
 import { cosinePalette } from '@/tsl/utils/color/cosine_palette'
 import { screenAspectUV } from '@/tsl/utils/function/screen_aspect_uv'
-import { grainTexturePattern } from '@/tsl/patterns/grain_texture_pattern'
 
 /**
  * A gradient sketch with fractionated coordinates.
@@ -60,5 +65,14 @@ const flare1 = Fn(() => {
 
   return finalColor
 })
+
+export const postProcessing = {
+  layers: [
+    { effect: contrastAdjustment, args: { amount: 1.2 } },
+    { effect: saturationAdjustment, args: { amount: 1.4 } },
+    { effect: hueRotateAdjustment, args: { angle: 0.1 } },
+    { effect: pixellationEffect, args: { size: 10 } },
+  ],
+} satisfies PostProcessingProps
 
 export default flare1
