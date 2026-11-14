@@ -35,7 +35,7 @@ export const simplexNoise3d = Fn(([v_immutable]) => {
   const y_ = vec4(floor(j.sub(mul(7.0, x_)))).toVar()
   const x = vec4(x_.mul(ns.x).add(ns.yyyy)).toVar()
   const y = vec4(y_.mul(ns.x).add(ns.yyyy)).toVar()
-  const h = vec4(sub(1.0, abs(x).sub(abs(y)))).toVar()
+  const h = vec4(sub(1.0, abs(x)).sub(abs(y))).toVar()
   const b0 = vec4(x.xy, y.xy).toVar()
   const b1 = vec4(x.zw, y.zw).toVar()
   const s0 = vec4(floor(b0).mul(2.0).add(1.0)).toVar()

@@ -34,6 +34,10 @@ This will add a new route to the project that can be accessed at `[localhost]/sk
 - `src/sketches/effects/bloom.ts` → accessible at `[localhost]/sketches/effects/bloom`
 - `src/sketches/experiments/noise.ts` → accessible at `[localhost]/sketches/experiments/noise`
 
+A sketch can be a `.ts` file that default-exports a TSL `Fn` (used as the `colorNode`), or a `.tsx` file that default-exports a React component. The component renders inside the scene, so it can use hooks like `useFrame`, pointer events and the interactivity utilities, and it usually returns a `<WebGPUShader colorNode={...} />`:
+
+- `src/sketches/mouse-follow.tsx` → accessible at `[localhost]/sketches/mouse-follow`
+
 ### Example sketch structure
 
 The way that this project is set up is that each `sketch` is connected to the `colorNode` of a `MeshBasicNodeMaterial`. See [WebGPUSketch](src/components/canvas/webgpu_sketch.tsx) for more details.
