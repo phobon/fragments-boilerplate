@@ -130,10 +130,10 @@ type CaGpuState =
 const countMatch = (n: any, values: number[]) => {
   const first = values[0]
   if (first === undefined) {
-    return
+    // An empty list never matches (eg: Seeds has no survive counts)
+    return n.equal(1).and(n.equal(0))
   }
 
-  n.equal(1).and(n.equal(0))
   let match = n.equal(float(first))
   for (let i = 1; i < values.length; i++) {
     const v = values[i]!
@@ -153,9 +153,9 @@ const assignConwayToVar = (
   const surviveMatch = countMatch(liveNeighborCount, survive)
   // Alive: must match survive; dead: must match birth
   If(currentAlive.equal(1), () => {
-    If(surviveMatch, () => nextState.assign(1)).Else(() => nextState.assign(0))
+    If(surviveMatch, () => { nextState.assign(1) }).Else(() => { nextState.assign(0) })
   }).Else(() => {
-    If(birthMatch, () => nextState.assign(1)).Else(() => nextState.assign(0))
+    If(birthMatch, () => { nextState.assign(1) }).Else(() => { nextState.assign(0) })
   })
 }
 
@@ -272,14 +272,14 @@ const buildConwayPipelines = ({
               .and(neighborY.lessThan(rows)),
             () => {
               const neighborFlat = neighborY.mul(columns).add(neighborX)
-              If(readBuf.element(neighborFlat).equal(1), () => liveNeighborCount.addAssign(1))
+              If(readBuf.element(neighborFlat).equal(1), () => { liveNeighborCount.addAssign(1) })
             },
           )
         })
       } else {
         Loop({ start: 0, end: 8, type: 'int', condition: '<' }, ({ i: neighborIndex }) => {
           const neighborFlat = neighbourFlatIndices.element(neighborIndex)
-          If(readBuf.element(neighborFlat).equal(1), () => liveNeighborCount.addAssign(1))
+          If(readBuf.element(neighborFlat).equal(1), () => { liveNeighborCount.addAssign(1) })
         })
       }
 
@@ -296,7 +296,7 @@ const buildConwayPipelines = ({
                 .and(neighborX.lessThan(columns))
                 .and(neighborY.greaterThanEqual(0))
                 .and(neighborY.lessThan(rows)),
-              () => value.assign(readBuf.element(neighborY.mul(columns).add(neighborX))),
+              () => { value.assign(readBuf.element(neighborY.mul(columns).add(neighborX))) },
             )
           } else {
             const wrappedX = neighborX.add(columns).mod(columns)
@@ -433,14 +433,14 @@ export const CellularAutomata = ({
           const cellY = floor(float(instanceIndex.div(columns)))
           const initialState = float(0).toVar()
           if (layerInitialCell) {
-            If(cellX.equal(float(layerInitialCell.column)).and(cellY.equal(float(layerInitialCell.row))), () =>
-              initialState.assign(1),
-            )
+            If(cellX.equal(float(layerInitialCell.column)).and(cellY.equal(float(layerInitialCell.row))), () => {
+              initialState.assign(1)
+            })
           } else if (layerSeed === 'apex-top') {
-            If(cellX.equal(float(Math.floor(columns / 2))).and(cellY.equal(0)), () => initialState.assign(1))
+            If(cellX.equal(float(Math.floor(columns / 2))).and(cellY.equal(0)), () => { initialState.assign(1) })
           } else {
             const noise = hash(instanceIndex.add(float(layerHashSalt * 1e3)))
-            If(noise.lessThan(float(layerSeedDensity)), () => initialState.assign(1))
+            If(noise.lessThan(float(layerSeedDensity)), () => { initialState.assign(1) })
           }
           bufferA.element(instanceIndex).assign(initialState)
         })().compute(CA_GRID_SIZE)
@@ -499,16 +499,16 @@ export const CellularAutomata = ({
         const flatCellIndex = cellRow.mul(columns).add(cellColumn)
 
         const fragmentColor = vec3(0).toVar()
-        If(outsideFraming, () => fragmentColor.assign(backgroundVector)).Else(() => {
+        If(outsideFraming, () => { fragmentColor.assign(backgroundVector) }).Else(() => {
           const composited = backgroundVector.toVar()
           for (let i = 0; i < layers.length; i++) {
             const pass = computePasses[i]!
             const readBufferA = layerBuffers[i * 2]!
             const readBufferB = layerBuffers[i * 2 + 1]!
             const cellAlive = float(0).toVar()
-            If(pass.displayIsA.equal(1), () => cellAlive.assign(readBufferA.element(flatCellIndex))).Else(() =>
-              cellAlive.assign(readBufferB.element(flatCellIndex)),
-            )
+            If(pass.displayIsA.equal(1), () => { cellAlive.assign(readBufferA.element(flatCellIndex)) }).Else(() => {
+              cellAlive.assign(readBufferB.element(flatCellIndex))
+            })
             const maskRegions = layers[i]!.mask
             const maskWeight = float(1).toVar()
             if (maskRegions && maskRegions.length > 0) {
@@ -520,7 +520,7 @@ export const CellularAutomata = ({
                 const y1 = float(region.yEnd ?? 1)
                 const inColumnRange = gridUv.x.greaterThanEqual(x0).and(gridUv.x.lessThan(x1))
                 const inRowRange = gridUv.y.greaterThanEqual(y0).and(gridUv.y.lessThan(y1))
-                If(inColumnRange.and(inRowRange), () => maskWeight.assign(1))
+                If(inColumnRange.and(inRowRange), () => { maskWeight.assign(1) })
               }
             }
             const layerOpacity = cellAlive.mul(maskWeight)
@@ -558,14 +558,14 @@ export const CellularAutomata = ({
         const cellY = floor(float(instanceIndex.div(columns)))
         const initialState = float(0).toVar()
         if (paramsInitialCell) {
-          If(cellX.equal(float(paramsInitialCell.column)).and(cellY.equal(float(paramsInitialCell.row))), () =>
-            initialState.assign(1),
-          )
+          If(cellX.equal(float(paramsInitialCell.column)).and(cellY.equal(float(paramsInitialCell.row))), () => {
+            initialState.assign(1)
+          })
         } else if (seedMode === 'apex-top') {
-          If(cellX.equal(float(Math.floor(columns / 2))).and(cellY.equal(0)), () => initialState.assign(1))
+          If(cellX.equal(float(Math.floor(columns / 2))).and(cellY.equal(0)), () => { initialState.assign(1) })
         } else {
           const noise = hash(instanceIndex)
-          If(noise.lessThan(float(seedDensity)), () => initialState.assign(1))
+          If(noise.lessThan(float(seedDensity)), () => { initialState.assign(1) })
         }
         bufferA.element(instanceIndex).assign(initialState)
       })().compute(CA_GRID_SIZE)
